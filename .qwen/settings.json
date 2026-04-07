@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(dir *)",
+      "Bash(npx *)",
+      "Bash(findstr *)",
+      "Bash(mkdir *)",
+      "Bash(type *)",
+      "Bash(docker compose *)",
+      "Bash(docker ps *)",
+      "Bash(docker pull *)",
+      "Bash(sc *)",
+      "Bash(tasklist *)",
+      "Bash(timeout *)",
+      "Bash(curl *)",
+      "Bash(powershell *)",
+      "Bash(taskkill *)",
+      "Bash(true)",
+      "Bash(netstat *)",
+      "Bash(python *)",
+      "Bash(strings *)",
+      "Bash(pip install *)",
+      "Bash(start *)",
+      "Bash(docker info *)",
+      "Bash(node *)",
+      "Bash(del *)",
+      "Bash(git init)",
+      "Bash(git add *)",
+      "Bash(rmdir *)"
+    ]
+  },
+  "$version": 3
+}

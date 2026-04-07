@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink-50 text-ink-900;
+    font-family: 'SimSun', 'STSong', 'Noto Serif SC', serif;
+    background-image: linear-gradient(135deg, #f9f8f6 0%, #f0ede7 50%, #e8e4dc 100%);
+    min-height: 100vh;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-seal-200 text-ink-900;
+  }
+}
+
+@layer components {
+  /* ── Buttons ── */
+  .btn {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded font-medium transition-all duration-300 
+           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-seal-500
+           disabled:opacity-50 disabled:cursor-not-allowed
+           active:scale-[0.97] transform;
+    font-family: 'KaiTi', 'STKaiti', serif;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary {
+    @apply btn bg-seal-600 text-white hover:bg-seal-700 shadow-sm hover:shadow-md;
+  }
+  .btn-secondary {
+    @apply btn bg-ink-200 text-ink-700 hover:bg-ink-300;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:bg-red-700 shadow-sm;
+  }
+  .btn-success {
+    @apply btn bg-success text-white hover:bg-green-700 shadow-sm;
+  }
+  .btn-gold {
+    @apply btn bg-gold-500 text-white hover:bg-gold-600 shadow-sm;
+  }
+  .btn-seal {
+    @apply btn bg-seal-600 text-white hover:bg-seal-700 shadow-sm;
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full px-4 py-2.5 border-2 border-ink-200 bg-white/80 rounded-lg 
+           focus:ring-2 focus:ring-seal-400 focus:border-seal-500 outline-none 
+           transition-all duration-300 placeholder:text-ink-300;
+    font-family: 'KaiTi', 'STKaiti', serif;
+    letter-spacing: 0.05em;
+  }
+  .input:focus {
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-white/90 backdrop-blur-sm rounded-lg shadow-paper border border-ink-100;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, seal-500 50%, transparent 100%);
+  }
+
+  /* ── Timer Bar ── */
+  .timer-bar {
+    @apply h-2 rounded-full transition-all duration-1000 ease-linear;
+    background: linear-gradient(90deg, bamboo-500, bamboo-400);
+  }
+
+  /* ── Option Buttons ── */
+  .option-btn {
+    @apply w-full text-left px-4 py-3 rounded-lg border-2 border-ink-200 
+           hover:border-seal-400 hover:bg-seal-50 
+           transition-all duration-300 
+           focus:outline-none focus:ring-2 focus:ring-seal-500;
+    font-family: 'KaiTi', 'STKaiti', serif;
+    letter-spacing: 0.03em;
+  }
+  .option-btn.selected {
+    @apply border-seal-500 bg-seal-50 text-seal-800;
+  }
+  .option-btn.correct {
+    @apply border-success bg-green-50 text-green-800;
+  }
+  .option-btn.wrong {
+    @apply border-danger bg-red-50 text-red-800;
+  }
+
+  /* ── Decorative Elements ── */
+  .seal-stamp {
+    @apply inline-flex items-center justify-center w-12 h-12 rounded-sm border-2 border-seal-500;
+    color: #c0392b;
+    font-family: 'SimSun', serif;
+    font-weight: bold;
+    animation: sealStamp 0.3s ease-out;
+  }
+
+  .ink-divider {
+    @apply w-full h-px my-4;
+    background: linear-gradient(90deg, transparent 0%, ink-300 50%, transparent 100%);
+  }
+
+  /* ── Scroll/Vertical Text ── */
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* ── Poem Card ── */
+  .poem-card {
+    @apply bg-white/95 backdrop-blur-sm rounded-lg shadow-ink p-6 border border-ink-100;
+    position: relative;
+  }
+  .poem-card::before,
+  .poem-card::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid seal-300;
+    opacity: 0.4;
+  }
+  .poem-card::before {
+    top: 8px;
+    left: 8px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .poem-card::after {
+    bottom: 8px;
+    right: 8px;
+    border-left: none;
+    border-top: none;
+  }
+}
+
+@keyframes sealStamp {
+  0% { transform: scale(2); opacity: 0; }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}

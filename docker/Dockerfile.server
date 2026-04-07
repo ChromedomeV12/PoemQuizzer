@@ -1,0 +1,46 @@
+# ── Server Dockerfile ──
+# Context: project root (../ from docker/)
+# Multi-stage: install all deps, build, then run with production deps
+
+FROM node:20-alpine AS base
+RUN apk add --no-cache openssl
+WORKDIR /app
+
+# ── Stage 1: Install ALL dependencies (including devDeps for build)
+FROM base AS deps
+COPY server/package.json ./server/package.json
+COPY package.json ./
+RUN npm install
+WORKDIR /app/server
+RUN npm install
+
+# ── Stage 2: Build
+FROM base AS builder
+COPY --from=deps /app ./
+COPY server/tsconfig.json ./server/tsconfig.json
+COPY server/src ./server/src
+COPY server/prisma ./server/prisma
+COPY tsconfig.base.json ./tsconfig.base.json
+
+WORKDIR /app/server
+RUN npx prisma generate
+RUN npm run build
+
+# ── Stage 3: Production runtime
+FROM node:20-alpine AS runner
+RUN apk add --no-cache openssl
+WORKDIR /app
+
+# Copy production package.json and install ONLY production deps
+COPY server/package.json ./package.json
+RUN npm install --omit=dev
+
+# Copy built output + prisma schema + generated client
+COPY --from=builder /app/server/dist ./dist
+COPY --from=builder /app/server/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/server/node_modules/@prisma ./node_modules/@prisma
+
+EXPOSE 5000
+
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]

@@ -1,0 +1,130 @@
+// Prisma Schema for PoemQuizzer
+// Supports User management, Questions, Quiz Attempts, and Scores
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum EventPhase {
+  PRE_QUALIFIER
+  FINALS
+}
+
+model User {
+  id              String       @id @default(uuid())
+  email           String       @unique
+  username        String       @unique
+  password        String
+  role            Role         @default(USER)
+  
+  // Profile fields (set once, editable only by admin)
+  fullName        String?
+  grade           String?       // e.g., "高一", "高二"
+  studentId       String?       @unique
+  
+  profileComplete Boolean      @default(false)
+  
+  scores          Score[]
+  submissions     Submission[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([email])
+  @@index([username])
+  @@index([studentId])
+}
+
+model Question {
+  id              String        @id @default(uuid())
+  type            QuestionType
+  phase           EventPhase
+  
+  questionText    String        @db.Text
+  imageUrl        String?
+  
+  // For MULTIPLE_CHOICE and TRUE_FALSE
+  options         Json?         // Array of strings: ["Option A", "Option B", ...]
+  correctAnswer   String        // For MC/TF: exact option string; For Short Answer: primary keyword
+  
+  // For SHORT_ANSWER - alternative acceptable keywords
+  keywords        Json?         // Array of strings: ["keyword1", "keyword2", ...]
+  
+  explanation     String?       @db.Text
+  points          Int           @default(1)
+  timeLimit       Int           @default(30) // seconds
+  
+  order           Int           @default(0)
+  isActive        Boolean       @default(true)
+  
+  submissions     Submission[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([phase])
+  @@index([isActive])
+}
+
+model Submission {
+  id              String        @id @default(uuid())
+  userId          String
+  questionId      String
+  
+  userAnswer      String        @db.Text
+  isCorrect       Boolean
+  timeTaken       Int           // milliseconds from client
+  tabSwitches     Int           @default(0)  // number of times user left the tab
+
+  answeredAt      DateTime      @default(now())
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question        Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+}
+
+model Score {
+  id              String        @id @default(uuid())
+  userId          String
+  phase           EventPhase
+  
+  totalScore      Int           @default(0)
+  correctAnswers  Int           @default(0)
+  totalQuestions  Int           @default(0)
+  timeCompleted   DateTime?
+  
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phase])
+  @@index([userId])
+  @@index([phase])
+  @@index([totalScore])
+}
+
+model AdminLog {
+  id              String        @id @default(uuid())
+  adminId         String
+  action          String        // "CREATE_QUESTION", "EDIT_USER", etc.
+  details         Json?
+  createdAt       DateTime      @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+}
