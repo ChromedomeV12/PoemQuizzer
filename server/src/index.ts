@@ -3,17 +3,29 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
+import { neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
 import rateLimit from 'express-rate-limit';
 
 // Load environment variables
 dotenv.config();
 
+// Configure Neon for WebSocket support
+neonConfig.webSocketConstructor = ws;
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Prisma
-export const prisma = new PrismaClient();
+/**
+ * Initialize Prisma with Neon Serverless Adapter
+ * This provides low-latency PostgreSQL access specifically optimized 
+ * for Vercel, Render, and Neon.
+ */
+const connectionString = process.env.DATABASE_URL || '';
+const adapter = new PrismaNeon({ connectionString });
+export const prisma = new PrismaClient({ adapter });
 
 // Security middleware
 app.use(helmet());

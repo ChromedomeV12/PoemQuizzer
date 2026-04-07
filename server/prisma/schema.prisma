@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -55,7 +55,7 @@ model Question {
   type            QuestionType
   phase           EventPhase
   
-  questionText    String        @db.Text
+  questionText    String
   imageUrl        String?
   
   // For MULTIPLE_CHOICE and TRUE_FALSE
@@ -65,7 +65,7 @@ model Question {
   // For SHORT_ANSWER - alternative acceptable keywords
   keywords        Json?         // Array of strings: ["keyword1", "keyword2", ...]
   
-  explanation     String?       @db.Text
+  explanation     String?
   points          Int           @default(1)
   timeLimit       Int           @default(30) // seconds
   
@@ -85,7 +85,7 @@ model Submission {
   userId          String
   questionId      String
   
-  userAnswer      String        @db.Text
+  userAnswer      String
   isCorrect       Boolean
   timeTaken       Int           // milliseconds from client
   tabSwitches     Int           @default(0)  // number of times user left the tab
