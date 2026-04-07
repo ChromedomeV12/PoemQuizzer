@@ -27,7 +27,8 @@
       "Bash(del *)",
       "Bash(git init)",
       "Bash(git add *)",
-      "Bash(rmdir *)"
+      "Bash(rmdir *)",
+      "Bash(git *)"
     ]
   },
   "$version": 3
