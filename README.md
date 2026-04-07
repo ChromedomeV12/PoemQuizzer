@@ -1,6 +1,6 @@
 # PoemQuizzer - Online Quiz Competition Platform
 
-A responsive, high-performance Online Quiz Competition Web App built for university events.
+A responsive, high-performance Online Quiz Competition Web App built for school events.
 
 ## 🚀 Tech Stack
 
