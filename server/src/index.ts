@@ -30,7 +30,10 @@ export const prisma = new PrismaClient({ adapter });
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:5173',
+    'https://poemguizzer.vercel.app' // Directly allow your Vercel URL
+  ],
   credentials: true,
 }));
 
