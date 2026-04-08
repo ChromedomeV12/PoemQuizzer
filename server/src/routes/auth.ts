@@ -20,7 +20,7 @@ const router = Router();
 router.post(
   '/register',
   [
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('email').optional({ checkFalsy: true }).isEmail().withMessage('Invalid email format'),
     body('username')
       .isLength({ min: 3, max: 30 })
       .withMessage('Username must be 3-30 characters'),
@@ -40,18 +40,18 @@ router.post(
       const { email, username, password } = req.body;
 
       // Sanitize inputs
-      const sanitizedEmail = sanitizeInput(email).toLowerCase();
+      const sanitizedEmail = email ? sanitizeInput(email).toLowerCase() : null;
       const sanitizedUsername = sanitizeInput(username).toLowerCase();
 
       // Validate formats
-      if (!isValidEmail(sanitizedEmail)) {
+      if (sanitizedEmail && !isValidEmail(sanitizedEmail)) {
         res.status(400).json({ error: 'Invalid email format' });
         return;
       }
 
       if (!isValidUsername(sanitizedUsername)) {
         res.status(400).json({
-          error: 'Username must be 3-30 alphanumeric characters or underscores',
+          error: 'Username must be 3-30 alphanumeric characters, underscores or Chinese characters',
         });
         return;
       }
@@ -62,13 +62,15 @@ router.post(
       }
 
       // Check for existing user
-      const existingEmail = await prisma.user.findUnique({
-        where: { email: sanitizedEmail },
-      });
+      if (sanitizedEmail) {
+        const existingEmail = await prisma.user.findUnique({
+          where: { email: sanitizedEmail },
+        });
 
-      if (existingEmail) {
-        res.status(409).json({ error: 'Email already registered' });
-        return;
+        if (existingEmail) {
+          res.status(409).json({ error: 'Email already registered' });
+          return;
+        }
       }
 
       const existingUsername = await prisma.user.findUnique({
@@ -87,7 +89,7 @@ router.post(
       // Create user
       const user = await prisma.user.create({
         data: {
-          email: sanitizedEmail,
+          email: sanitizedEmail || null,
           username: sanitizedUsername,
           password: hashedPassword,
         },
@@ -102,7 +104,7 @@ router.post(
       });
 
       // Generate JWT
-      const token = generateToken(user.id, user.email, user.role);
+      const token = generateToken(user.id, user.email || 'no-email', user.role);
 
       res.status(201).json({
         message: 'Registration successful',

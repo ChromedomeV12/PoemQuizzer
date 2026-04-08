@@ -27,9 +27,10 @@ export function isValidEmail(email: string): boolean {
 
 /**
  * Validate a username (alphanumeric, underscores, 3-30 chars).
+ * Supports Unicode (Chinese characters).
  */
 export function isValidUsername(username: string): boolean {
-  const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+  const usernameRegex = /^[\w\u4e00-\u9fa5]{3,30}$/;
   return usernameRegex.test(username);
 }
 
@@ -43,9 +44,10 @@ export function isValidStudentId(studentId: string): boolean {
 
 /**
  * Validate a name (letters, spaces, hyphens, apostrophes, 2-100 chars).
+ * Supports Unicode (Chinese characters).
  */
 export function isValidName(name: string): boolean {
-  const nameRegex = /^[a-zA-Z\s\-']{2,100}$/;
+  const nameRegex = /^[\u4e00-\u9fa5a-zA-Z\s\-']{2,100}$/;
   return nameRegex.test(name);
 }
 
