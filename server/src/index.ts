@@ -22,35 +22,39 @@ export const prisma = new PrismaClient({ adapter });
 // Initialize Express app
 const app = express();
 
-// 1. ABSOLUTE TOP: CORS & PREFLIGHT
-// This must come before helmet, rateLimit, and everything else.
+/**
+ * 🛠️ DIAGNOSTIC LOGGING
+ * Logs every request that hits the server to Render's logs.
+ */
+app.use((req, _res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  next();
+});
+
+// 1. ABSOLUTE TOP: WILDCARD CORS (For Debugging)
 app.use(cors({
-  origin: [
-    'https://poemguizzer.vercel.app',
-    'http://localhost:5173'
-  ],
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-// Manual fallback for OPTIONS requests to ensure they NEVER 404 or fail CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://poemguizzer.vercel.app');
+// Manual forced headers for ALL responses
+app.use((_req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
   next();
 });
 
-// 2. Security & Rate Limiting
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+// Immediate response for OPTIONS
+app.options('*', (_req, res) => {
+  res.sendStatus(200);
+});
+
+// 2. Disable Helmet/RateLimit temporarily to isolate CORS
+// app.use(helmet(...));
+// app.use('/api/', limiter);
 
 const PORT = process.env.PORT || 5000;
 
