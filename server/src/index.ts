@@ -24,8 +24,7 @@ const app = express();
 
 // 1. ABSOLUTE TOP: SECURE CORS & PREFLIGHT
 const allowedOrigins = [
-  'https://poem-guizzer.vercel.app',
-  'https://poemguizzer.vercel.app',
+  'https://poemguizzer.vercel.app', // Correct Vercel URL (No hyphen)
   'http://localhost:5173'
 ];
 
