@@ -22,39 +22,36 @@ export const prisma = new PrismaClient({ adapter });
 // Initialize Express app
 const app = express();
 
-/**
- * 🛠️ DIAGNOSTIC LOGGING
- * Logs every request that hits the server to Render's logs.
- */
-app.use((req, _res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
-  next();
-});
+// 1. ABSOLUTE TOP: SECURE CORS & PREFLIGHT
+const allowedOrigins = [
+  'https://poem-guizzer.vercel.app',
+  'https://poemguizzer.vercel.app',
+  'http://localhost:5173'
+];
 
-// 1. ABSOLUTE TOP: WILDCARD CORS (For Debugging)
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.CLIENT_URL === origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-// Manual forced headers for ALL responses
-app.use((_req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  next();
-});
+// Handle Preflight (OPTIONS)
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true,
+}) as any);
 
-// Immediate response for OPTIONS
-app.options('*', (_req, res) => {
-  res.sendStatus(200);
-});
-
-// 2. Disable Helmet/RateLimit temporarily to isolate CORS
-// app.use(helmet(...));
-// app.use('/api/', limiter);
+// 2. Security & Rate Limiting
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const PORT = process.env.PORT || 5000;
 
@@ -63,6 +60,11 @@ const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
   message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', limiter);
   standardHeaders: true,
   legacyHeaders: false,
 });
