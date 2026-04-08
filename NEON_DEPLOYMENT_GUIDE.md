@@ -1,77 +1,77 @@
-# 🐘 Neon PostgreSQL: The Ultimate Deployment Guide (2026)
+# 🐘 Neon Database: Step-by-Step "DIY" Guide for Non-Techies
 
-This guide explains how to master the **Neon Serverless Postgres** platform for your PoemQuizzer project using **Prisma 7**.
-
-## 1. 🏗️ Neon Project Architecture
-Neon separates **Storage** from **Compute**. 
-- **Storage:** Durable and reliable.
-- **Compute:** "Serverless" endpoints that automatically scale to zero when not in use.
+This guide is for setting up the **"Digital Filing Cabinet"** (the Database) where all the student names, poetry questions, and scores will be safely stored. Follow these steps exactly.
 
 ---
 
-## 2. 🔑 The Two-URL Strategy
-For Prisma 7 to work perfectly with Neon, you need **two** different connection strings in your environment.
-
-| Variable | URL Type | Purpose |
-| :--- | :--- | :--- |
-| `DATABASE_URL` | **Pooled** | Used by your **App** at runtime (Node.js). Handles many simultaneous users. |
-| `DIRECT_URL` | **Direct** | Used by **Prisma CLI** for migrations (`npx prisma migrate deploy`). |
-
-### How to get them:
-1.  Go to the **Neon Dashboard** → **Connection Details**.
-2.  Toggle the **"Connection Pooling"** switch **ON**.
-3.  Copy the URL (it will have `-pooler` in the hostname). This is your `DATABASE_URL`.
-4.  Toggle the switch **OFF**.
-5.  Copy the URL. This is your `DIRECT_URL`.
+## 🏗️ Step 1: Create your Neon Account
+1.  Go to [Neon.tech](https://neon.tech).
+2.  Click the **"Sign Up"** button.
+3.  Choose **"Continue with GitHub"**. This connects your database to your code account.
+4.  If it asks for a project name, type `PoemQuizzer`.
+5.  If it asks for a region, choose the one closest to you (e.g., `Singapore` or `US East`).
+6.  Click **"Create Project"**.
 
 ---
 
-## 🛠️ Prisma 7 Configuration
-The project is already configured to use the **Neon Serverless Adapter** in `server/src/index.ts`. This ensures low-latency database access over WebSockets.
+## 🏗️ Step 2: Get your "Secret Keys" (Connection Strings)
+This is the most important part. You need two different "addresses" for your database to work.
 
-### Environment Variables
-Ensure these are set in your **Render** dashboard and your local `server/.env`:
-```env
-DATABASE_URL="postgresql://user:password@endpoint-pooler.region.aws.neon.tech/neondb?sslmode=require"
-DIRECT_URL="postgresql://user:password@endpoint.region.aws.neon.tech/neondb?sslmode=require"
-```
+### 🔑 Key #1: The "Everyday" Address (Pooled)
+*This is what the website uses while students are taking the quiz.*
 
----
+1.  On your Neon Dashboard, look for the box titled **"Connection Details"**.
+2.  Find the small switch that says **"Pooled connection"**.
+3.  **Turn that switch ON.** (It should turn green/blue).
+4.  Look at the long text that looks like: `postgres://alex:abcd@ep-cool-darkness-123-pooler.us-east-2.aws.neon.tech/neondb`
+5.  Click the **Copy** icon next to it.
+6.  **Save this somewhere safe.** Label it as `DATABASE_URL`.
 
-## 🚀 Deployment Workflow
+### 🔑 Key #2: The "Manager" Address (Direct)
+*This is what the system uses to set up the tables and structure.*
 
-### Step 1: Initialize the Production DB
-Push your local schema to the Neon production project.
-```bash
-cd server
-npx prisma migrate deploy
-```
-
-### Step 2: Seed the Data
-Populate your competition questions and admin user.
-```bash
-npm run db:seed
-```
-
-### Step 3: Neon "Scale-to-Zero" Tuning
-Neon computes turn off after 5 minutes of idle time by default.
-- **For the competition:** Go to **Autoscaling** settings in Neon and set "Suspend compute after" to a higher value (e.g., 20 minutes) so users don't experience "Cold Starts" during the event.
+1.  Go back to that same **"Pooled connection"** switch.
+2.  **Turn that switch OFF.**
+3.  The text will change slightly (the word `-pooler` will disappear).
+4.  Click the **Copy** icon next to this new text.
+5.  **Save this somewhere safe.** Label it as `DIRECT_URL`.
 
 ---
 
-## 🌿 Advanced: Database Branching
-Before making a big change to your quiz questions:
-1.  **Create a Branch:** Create a "test" branch of your database in the Neon UI.
-2.  **Test:** Point your local `DATABASE_URL` to this branch.
-3.  **Deploy:** Once verified, apply the changes to the `main` branch.
+## 🏗️ Step 3: Put the Keys into the "Brain" (Render)
+Now that you have your two keys, you need to give them to your Backend (Render) so it can talk to the database.
+
+1.  Open your [Render.com](https://render.com) dashboard.
+2.  Click on your `PoemQuizzer` service.
+3.  Click the **"Environment"** tab on the left.
+4.  Click **"Add Environment Variable"**.
+5.  In the first box, type `DATABASE_URL`. In the second box, paste your **Key #1 (Pooled)**.
+6.  Click **"Add Environment Variable"** again.
+7.  In the first box, type `DIRECT_URL`. In the second box, paste your **Key #2 (Direct)**.
+8.  Click **"Save Changes"**.
 
 ---
 
-### ✅ Deployment Checklist for Neon
-- [ ] Connection Pooling toggled **ON** for `DATABASE_URL`.
-- [ ] `DIRECT_URL` set for migrations.
-- [ ] `?sslmode=require` added to all connection strings.
-- [ ] Neon Project region matches your Render/Vercel region.
+## 🏗️ Step 4: Prepare for Competition Day (Anti-Sleep)
+Because we are using the **Free Tier**, Neon likes to "go to sleep" if no one uses it for 5 minutes. To prevent students from waiting:
+
+1.  In your Neon Dashboard, go to **"Settings"** on the left menu.
+2.  Click **"Autoscaling"**.
+3.  Find the setting that says **"Suspend compute after"**.
+4.  Change it from `5 minutes` to **`20 minutes`** (or more).
+5.  Click **"Save"**.
+6.  **On the morning of the event:** Open your website yourself 10 minutes before the students arrive. This "wakes up" the database so it's ready to go!
 
 ---
-*Built with React 19, Node.js, and Prisma 7.*
+
+## 🏗️ Step 5: Checking the Scores (The "Live View")
+If you want to see the scores manually without using the Admin Dashboard:
+
+1.  In the Neon Dashboard, click **"SQL Editor"** on the left.
+2.  Type this exact sentence into the big white box:
+    `SELECT * FROM "Score" ORDER BY "totalScore" DESC;`
+3.  Click the blue **"Run"** button.
+4.  You will see a list of everyone's scores in real-time!
+
+---
+*Success! Your database is now connected and ready for the 2026 Poetry Competition.*
