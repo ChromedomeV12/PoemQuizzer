@@ -56,13 +56,18 @@ Click **"Save and Deploy"**.
 
 ---
 
-## 🛑 Common "Gotchas" (Caution!)
+### 🛑 Common "Gotchas" (Caution!)
 
-### 1. The "npm ci" Error
-If you see an error about `npm ci`, it means you accidentally put `/client` in the **Root Directory** box. Go back to **Settings -> Builds & Deployments** and make sure Root Directory is empty.
+### 1. The "npm ci" or "Sync" Error
+If you see an error saying `package.json and package-lock.json are out of sync`:
+*   **The Fix:** Go to **Settings -> Environment variables**.
+*   Add a new variable:
+    *   **Name:** `NPM_FLAGS`
+    *   **Value:** `--no-package-lock`
+*   This tells Cloudflare to ignore the sync issue and just install the latest versions.
 
-### 2. Blank Screen after Login
-If you can see the login page but the screen goes white after clicking "Login", double-check that your Render `CLIENT_URL` matches your Cloudflare link **exactly** (no extra slash at the end).
+### 2. The Node.js Version Error
+If the build fails immediately, ensure you have set `NODE_VERSION` to `20` in the environment variables.
 
 ### 3. "Failed to Fetch"
 This means the **VITE_API_URL** is wrong. Ensure it starts with `https://` and ends with `/api`.
