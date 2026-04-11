@@ -8,10 +8,7 @@ import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 import rateLimit from 'express-rate-limit';
 
-// Load environment variables
-dotenv.config();
-
-// Configure Neon for WebSocket support
+// Required for Neon Serverless WebSockets
 neonConfig.webSocketConstructor = ws;
 
 // Initialize Prisma with Neon Serverless Adapter
@@ -19,12 +16,13 @@ const connectionString = process.env.DATABASE_URL || '';
 const adapter = new PrismaNeon({ connectionString });
 export const prisma = new PrismaClient({ adapter });
 
-// Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // 1. ABSOLUTE TOP: SECURE CORS & PREFLIGHT
 const allowedOrigins = [
-  'https://poemguizzer.vercel.app', // Correct Vercel URL (No hyphen)
+  'https://poemguizzer.vercel.app',
+  'https://poemguizzer.pages.dev', // Whitelist Cloudflare Pages
   'http://localhost:5173'
 ];
 
