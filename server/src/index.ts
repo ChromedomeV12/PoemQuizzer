@@ -22,8 +22,9 @@ const PORT = process.env.PORT || 5000;
 // 1. ABSOLUTE TOP: SECURE CORS & PREFLIGHT
 const allowedOrigins = [
   'https://poemguizzer.vercel.app',
+  'https://poem-guizzer.vercel.app', // Adding both Vercel variants
   'https://poemguizzer.pages.dev',
-  'https://poemguizzer.uhn-ccc.workers.dev', // New Cloudflare Workers URL
+  'https://poemguizzer.uhn-ccc.workers.dev',
   'http://localhost:5173'
 ];
 
