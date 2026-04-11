@@ -1,79 +1,71 @@
 # 🌐 Cloudflare Pages: Step-by-Step Guide for China-Friendly Hosting
 
-Vercel is often blocked in mainland China. This guide explains how to move your website to **Cloudflare Pages**, which is much more stable and accessible for Chinese students.
+Vercel is often blocked in mainland China. This guide explains how to move your website to **Cloudflare Pages**, which is much more stable for Chinese students.
 
 ---
 
 ## 🏗️ Step 1: Create your Cloudflare Account
-1.  Go to [Cloudflare.com](https://www.cloudflare.com).
-2.  Click **"Sign Up"**.
-3.  Use your email or GitHub account to create an account.
-4.  Once logged in, look at the left-hand menu and click **"Workers & Pages"**.
+1.  Go to [Cloudflare.com](https://www.cloudflare.com) and **Sign Up**.
+2.  Once logged in, click **"Workers & Pages"** on the left sidebar.
 
 ---
 
 ## 🏗️ Step 2: Connect your Code
-1.  Click the blue button that says **"Create application"**.
-2.  On the next screen, click the **"Pages"** tab (at the top).
-3.  Click **"Connect to Git"**.
-4.  Select **"GitHub"** and follow the prompts to allow Cloudflare to see your code.
-5.  Find your `PoemQuizzer` repository in the list and click **"Begin setup"**.
+1.  Click **"Create application"** -> **"Pages"** -> **"Connect to Git"**.
+2.  Select your **GitHub** account and find the `PoemQuizzer` repository.
+3.  Click **"Begin setup"**.
 
 ---
 
-## 🏗️ Step 3: Configure the Build (Very Important!)
-You need to tell Cloudflare exactly how to build your website. Fill in these boxes carefully:
+## 🏗️ Step 3: Configure the Build (Monorepo Fix!)
+Because our project has both a `client` and `server` folder, we must use these **exact** settings to avoid errors:
 
-1.  **Project Name:** `poemquizzer` (or anything you like).
-2.  **Production Branch:** `main`.
-3.  **Framework Preset:** Scroll down and choose **"Vite"**.
-4.  **Root Directory:** This is crucial. Type **`/client`** (ensure the slash is there).
-5.  **Build Command:** It should automatically say `npm run build`. Leave it as is.
-6.  **Build Output Directory:** It should automatically say `dist`. Leave it as is.
-
----
-
-## 🏗️ Step 4: Link to the "Brain" (Render)
-Cloudflare needs to know where your Backend (Render) is.
-
-1.  Click the button that says **"Environment variables (advanced)"**.
-2.  Click **"Add variable"**.
-3.  In the **Variable name** box, type: `VITE_API_URL`
-4.  In the **Value** box, paste your Render link: `https://poem-guizzer.onrender.com/api`
-    *   *(Make sure there is no space at the end!)*
-5.  Click **"Save and Deploy"**.
+1.  **Project Name:** `poemquizzer`
+2.  **Production Branch:** `main`
+3.  **Framework Preset:** Choose **"Vite"**.
+4.  **Root Directory:** ⚠️ **Leave this EMPTY (the / root).** 
+    *   *Do NOT put "/client" here, otherwise the installation will fail.*
+5.  **Build Command:** Change this to:
+    `npm install && npm run build:client`
+6.  **Build Output Directory:** Change this to:
+    `client/dist`
 
 ---
 
-## 🏗️ Step 5: Get your New Link
-1.  Cloudflare will now start building your site. This takes about 2-3 minutes.
-2.  Once finished, you will see a big green checkmark and a link like:
-    `https://poemquizzer.pages.dev`
-3.  **Copy this new link.**
+## 🏗️ Step 4: Environment Variables (Critical!)
+You must add **two** variables here, or the site will be blank or crash.
+
+1.  Click **"Environment variables (advanced)"** -> **"Add variable"**.
+2.  **Variable 1 (The Brain Link):**
+    *   **Name:** `VITE_API_URL`
+    *   **Value:** `https://poem-guizzer.onrender.com/api`
+3.  **Variable 2 (The Node Fix):**
+    *   **Name:** `NODE_VERSION`
+    *   **Value:** `20` 
+    *   *(This ensures Cloudflare uses modern tools required for React 19).*
+
+Click **"Save and Deploy"**.
 
 ---
 
-## 🏗️ Step 6: Final Update in Render
-Now you must tell your Backend to trust the new Cloudflare link.
-
-1.  Open your [Render.com](https://render.com) dashboard.
-2.  Click on your `PoemQuizzer` service.
-3.  Go to the **"Environment"** tab.
-4.  Find the variable named **`CLIENT_URL`**.
-5.  Replace the old Vercel link with your **new Cloudflare link** (e.g., `https://poemquizzer.pages.dev`).
-6.  Click **"Save Changes"**.
+## 🏗️ Step 5: Update the Backend (Render)
+1.  Once Cloudflare finishes (green checkmark), copy your new link (e.g., `https://poemquizzer.pages.dev`).
+2.  Go to your **Render.com** dashboard -> **Poem API** -> **Environment**.
+3.  Update **`CLIENT_URL`** to your new Cloudflare link.
+4.  **Save Changes.**
 
 ---
 
-## 🏗️ Step 7: Final Update in Backend Code (Optional but Recommended)
-To be 100% safe, I will also update the code to whitelist `.pages.dev` URLs.
+## 🛑 Common "Gotchas" (Caution!)
+
+### 1. The "npm ci" Error
+If you see an error about `npm ci`, it means you accidentally put `/client` in the **Root Directory** box. Go back to **Settings -> Builds & Deployments** and make sure Root Directory is empty.
+
+### 2. Blank Screen after Login
+If you can see the login page but the screen goes white after clicking "Login", double-check that your Render `CLIENT_URL` matches your Cloudflare link **exactly** (no extra slash at the end).
+
+### 3. "Failed to Fetch"
+This means the **VITE_API_URL** is wrong. Ensure it starts with `https://` and ends with `/api`.
 
 ---
-
-### ✅ Success! 
-Your website is now hosted on Cloudflare's global network. 
-*   **Students in China:** Send them the `.pages.dev` link.
-*   **Stability:** This link is much less likely to be blocked during the competition.
-
----
-*Generated by Gemini CLI for the 2026 Poetry Competition.*
+*Success! Your project is now optimized for students in mainland China.*
