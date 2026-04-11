@@ -25,8 +25,9 @@ Because our project has both a `client` and `server` folder, we must use these *
 3.  **Framework Preset:** Choose **"Vite"**.
 4.  **Root Directory:** ⚠️ **Leave this EMPTY (the / root).** 
     *   *Do NOT put "/client" here, otherwise the installation will fail.*
-5.  **Build Command:** Change this to:
-    `npm install && npm run build:client`
+5. **Build Command:** Change this to:
+    `npm run build:client`
+
 6.  **Build Output Directory:** Change this to:
     `client/dist`
 
