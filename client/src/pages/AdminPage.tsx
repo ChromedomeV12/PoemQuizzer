@@ -95,6 +95,27 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleBanUser = async (userId: string, isBanned: boolean) => {
+    let reason = '';
+    if (isBanned) {
+      reason = prompt('请输入封禁原因：', '多次切屏违规') || '';
+      if (!reason) return;
+    } else {
+      if (!confirm('确定要解除该用户的封禁吗？')) return;
+    }
+
+    try {
+      const res = await adminApi.banUser(userId, isBanned, reason);
+      if (res.error) {
+        alert(res.error);
+        return;
+      }
+      loadData();
+    } catch {
+      alert('操作失败');
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
@@ -144,12 +165,13 @@ export const AdminPage: React.FC = () => {
                       <th className="text-left py-3 px-3 text-sm font-kai text-ink-500">年级</th>
                       <th className="text-left py-3 px-3 text-sm font-kai text-ink-500">学号</th>
                       <th className="text-center py-3 px-3 text-sm font-kai text-ink-500">角色</th>
+                      <th className="text-center py-3 px-3 text-sm font-kai text-ink-500">状态</th>
                       <th className="text-center py-3 px-3 text-sm font-kai text-ink-500">操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((user) => (
-                      <tr key={user.id} className="border-b border-ink-100 hover:bg-ink-50 font-kai">
+                      <tr key={user.id} className={`border-b border-ink-100 hover:bg-ink-50 font-kai ${user.isBanned ? 'bg-red-50' : ''}`}>
                         <td className="py-3 px-3">
                           <p className="font-medium">{user.fullName || '-'}</p>
                           <p className="text-xs text-ink-400">{user.username}</p>
@@ -165,9 +187,28 @@ export const AdminPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <button onClick={() => startEditUser(user)} className="btn btn-secondary text-xs py-1 px-3">
-                            编辑
-                          </button>
+                          {user.isBanned ? (
+                            <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-bold" title={user.banReason || ''}>
+                              已封禁
+                            </span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                              正常
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button onClick={() => startEditUser(user)} className="btn btn-secondary text-xs py-1 px-3">
+                              编辑
+                            </button>
+                            <button 
+                              onClick={() => handleBanUser(user.id, !user.isBanned)} 
+                              className={`btn text-xs py-1 px-3 ${user.isBanned ? 'btn-primary' : 'bg-red-600 text-white hover:bg-red-700'}`}
+                            >
+                              {user.isBanned ? '解封' : '封禁'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -303,9 +344,16 @@ export const AdminPage: React.FC = () => {
                 </p>
                 <div className="grid gap-3">
                   {((monitorData as { participants?: Array<Record<string, unknown>> }).participants || []).map((p) => (
-                    <div key={String(p.id)} className="p-4 bg-ink-50 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-kai">
+                    <div key={String(p.id)} className={`p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-kai ${p.isBanned ? 'bg-red-50 border border-red-200' : 'bg-ink-50'}`}>
                       <div>
-                        <p className="font-medium">{String(p.fullName)}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{String(p.fullName)}</p>
+                          {p.isBanned && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-600 text-white font-bold">
+                              已封禁
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-ink-400">{String(p.studentId)}</p>
                       </div>
                       <div className="flex gap-4 text-sm">

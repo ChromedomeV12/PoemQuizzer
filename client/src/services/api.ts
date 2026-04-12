@@ -134,6 +134,9 @@ export const adminApi = {
   deleteUser: (userId: string) =>
     request('DELETE', `/admin/users/${userId}`),
 
+  banUser: (userId: string, isBanned: boolean, reason?: string) =>
+    request('PUT', `/admin/users/${userId}/ban`, { isBanned, reason }),
+
   getQuestions: (params?: { phase?: string; type?: string }) => {
     const qs = new URLSearchParams();
     if (params?.phase) qs.set('phase', params.phase);

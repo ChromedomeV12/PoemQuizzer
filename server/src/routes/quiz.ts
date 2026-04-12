@@ -298,9 +298,20 @@ router.post(
           return;
       }
 
-      // Anti-cheat: >= 5 tab switches = auto-wrong
+      // Anti-cheat: >= 5 tab switches = auto-wrong AND permanent ban
       const isAutoWrong = switchCount >= 5;
       const finalIsCorrect = isAutoWrong ? false : isCorrect;
+
+      if (isAutoWrong) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            isBanned: true,
+            banReason: `Excessive tab switching detected (${switchCount} switches) on question ${questionId}.`,
+            bannedAt: new Date(),
+          },
+        });
+      }
 
       const submission = await prisma.submission.create({
         data: {

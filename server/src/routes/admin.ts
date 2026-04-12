@@ -53,6 +53,9 @@ router.get('/users', async (req: Request, res: Response): Promise<void> => {
           
           studentId: true,
           profileComplete: true,
+          isBanned: true,
+          banReason: true,
+          bannedAt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -204,6 +207,69 @@ router.delete(
     } catch (error) {
       console.error('Delete user error:', error);
       res.status(500).json({ error: 'Failed to delete user' });
+    }
+  }
+);
+
+// PUT /api/admin/users/:id/ban ?Ban or unban a user
+router.put(
+  '/users/:id/ban',
+  [
+    param('id').isUUID().withMessage('Valid user ID is required'),
+    body('isBanned').isBoolean().withMessage('isBanned must be a boolean'),
+    body('reason').optional().isString().withMessage('Reason must be a string'),
+  ],
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+        return;
+      }
+
+      const { id } = req.params as { id: string };
+      const { isBanned, reason } = req.body;
+
+      if (id === req.userId && isBanned) {
+        res.status(400).json({ error: 'Cannot ban your own account' });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({ where: { id } });
+
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: {
+          isBanned,
+          banReason: isBanned ? (reason || 'Admin action') : null,
+          bannedAt: isBanned ? new Date() : null,
+        },
+      });
+
+      await prisma.adminLog.create({
+        data: {
+          adminId: req.userId!,
+          action: isBanned ? 'BAN_USER' : 'UNBAN_USER',
+          details: { userId: id, reason },
+        },
+      });
+
+      res.json({ 
+        message: `User ${isBanned ? 'banned' : 'unbanned'} successfully`, 
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          isBanned: updatedUser.isBanned
+        }
+      });
+    } catch (error) {
+      console.error('Ban user error:', error);
+      res.status(500).json({ error: 'Failed to update ban status' });
     }
   }
 );
@@ -478,6 +544,8 @@ router.get('/monitor', async (_req: Request, res: Response): Promise<void> => {
       grade: p.grade,
       department: "",
       studentId: p.studentId,
+      isBanned: p.isBanned,
+      banReason: p.banReason,
       score: p.scores[0] || {
         totalScore: 0,
         correctAnswers: 0,

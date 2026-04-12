@@ -44,15 +44,24 @@ export const RegisterPage: React.FC = () => {
         formData.password
       );
 
+      console.log('Registration response:', response);
+
       if (response.error) {
         setError(response.error);
+        return;
+      }
+
+      if (!response.data || !('token' in (response.data as any)) || !('user' in (response.data as any))) {
+        console.error('Incomplete registration data:', response.data);
+        setError('注册接口返回数据不完整，请稍后重试');
         return;
       }
 
       const { token, user } = response.data as { token: string; user: User };
       login(token, user);
       navigate('/profile-setup');
-    } catch {
+    } catch (err) {
+      console.error('Registration catch error:', err);
       setError('网络错误，请重试');
     } finally {
       setIsLoading(false);

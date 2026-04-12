@@ -15,6 +15,9 @@ export interface User {
   grade: string | null;
   studentId: string | null;
   profileComplete: boolean;
+  isBanned?: boolean;
+  banReason?: string | null;
+  bannedAt?: string | null;
   createdAt: string;
 }
 

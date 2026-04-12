@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -39,6 +38,11 @@ model User {
   studentId       String?       @unique
   
   profileComplete Boolean      @default(false)
+  
+  // Anti-cheat: permanent ban for excessive tab switching
+  isBanned        Boolean      @default(false)
+  banReason       String?
+  bannedAt        DateTime?
   
   scores          Score[]
   submissions     Submission[]

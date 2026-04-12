@@ -47,14 +47,27 @@ export const authenticate = async (
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
 
-    // Verify user still exists in DB
+    // Verify user still exists in DB and check for ban
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, role: true },
+      select: { 
+        id: true, 
+        role: true,
+        isBanned: true,
+        banReason: true
+      },
     });
 
     if (!user) {
       res.status(401).json({ error: 'User no longer exists' });
+      return;
+    }
+
+    if (user.isBanned) {
+      res.status(403).json({ 
+        error: 'Your account has been banned from taking the quiz.',
+        reason: user.banReason || 'Excessive tab switching detected.'
+      });
       return;
     }
 
@@ -94,10 +107,14 @@ export const optionalAuth = async (
 
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
-        select: { id: true, role: true },
+        select: { 
+          id: true, 
+          role: true,
+          isBanned: true 
+        },
       });
 
-      if (user) {
+      if (user && !user.isBanned) {
         req.userId = user.id;
         req.userRole = user.role;
       }
