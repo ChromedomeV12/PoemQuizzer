@@ -58,29 +58,32 @@ export const QuizPage: React.FC = () => {
     if (!currentQuestion || feedback || isSubmitting) return;
 
     const handleVisibilityChange = () => {
+      // Only count when the tab becomes hidden (user leaves)
+      // Using ONLY visibilitychange to avoid double-counting with window blur
       if (document.hidden) {
         tabSwitchesRef.current += 1;
-        setTabSwitchCount(tabSwitchesRef.current);
+        const newCount = tabSwitchesRef.current;
+        setTabSwitchCount(newCount);
+        
+        if (newCount >= 5) {
+          // Automatic ban triggered on backend during submission, 
+          // but we redirect here for better UX
+          alert('检测到违规切屏次数过多，您的账号已被封禁。');
+          navigate('/dashboard');
+          return;
+        }
+
         setShowAntiCheatToast(true);
         setTimeout(() => setShowAntiCheatToast(false), 3000);
       }
     };
 
-    const handleWindowBlur = () => {
-      tabSwitchesRef.current += 1;
-      setTabSwitchCount(tabSwitchesRef.current);
-      setShowAntiCheatToast(true);
-      setTimeout(() => setShowAntiCheatToast(false), 3000);
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleWindowBlur);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleWindowBlur);
     };
-  }, [currentQuestion?.id, feedback, isSubmitting]);
+  }, [currentQuestion?.id, feedback, isSubmitting, navigate]);
 
   useEffect(() => {
     if (!currentQuestion || feedback || isSubmitting) return;
@@ -124,6 +127,14 @@ export const QuizPage: React.FC = () => {
     const switches = tabSwitchesRef.current;
     try {
       const response = await quizApi.submitAnswer(currentQuestion.id, selectedAnswer.trim(), timeTaken, switches);
+      
+      // Handle ban status (403 from backend)
+      if (response.error && response.error.includes('banned')) {
+        alert('您的账号已被封禁：' + (response.error || '切屏次数过多'));
+        navigate('/dashboard');
+        return;
+      }
+
       if (response.error) {
         setError(response.error);
         setIsSubmitting(false);

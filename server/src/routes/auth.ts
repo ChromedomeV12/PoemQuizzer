@@ -99,6 +99,8 @@ router.post(
           username: true,
           role: true,
           profileComplete: true,
+          isBanned: true,
+          banReason: true,
           createdAt: true,
         },
       });
@@ -174,6 +176,8 @@ router.post(
           username: user.username,
           role: user.role,
           profileComplete: user.profileComplete,
+          isBanned: user.isBanned,
+          banReason: user.banReason,
         },
         token,
       });
@@ -283,6 +287,8 @@ router.post(
           
           studentId: true,
           profileComplete: true,
+          isBanned: true,
+          banReason: true,
         },
       });
 
@@ -315,6 +321,8 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
         
         studentId: true,
         profileComplete: true,
+        isBanned: true,
+        banReason: true,
         createdAt: true,
       },
     });

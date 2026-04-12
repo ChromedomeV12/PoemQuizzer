@@ -8,7 +8,7 @@ export type EventPhase = 'PRE_QUALIFIER' | 'FINALS';
 
 export interface User {
   id: string;
-  email: string;
+  email?: string | null;
   username: string;
   role: UserRole;
   fullName: string | null;

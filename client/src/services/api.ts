@@ -82,7 +82,7 @@ async function request<T = unknown>(
 // Auth API
 // ──────────────────────────────────────────────
 export const authApi = {
-  register: (email: string, username: string, password: string) =>
+  register: (email: string | null | undefined, username: string, password: string) =>
     request('POST', '/auth/register', { email, username, password }),
 
   login: (identifier: string, password: string) =>

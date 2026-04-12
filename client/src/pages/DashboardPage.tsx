@@ -58,9 +58,32 @@ export const DashboardPage: React.FC = () => {
   const preStatus = getPreQualifierStatus();
   const finalStatus = getFinalsStatus();
 
+  // Override status if banned
+  const isBanned = user?.isBanned;
+  const preDisabled = preStatus.disabled || isBanned;
+  const finalDisabled = finalStatus.disabled || isBanned;
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
+        {/* Ban Notice */}
+        {isBanned && (
+          <div className="card mb-8 border-2 border-red-500 bg-red-50 animate-slide-up poem-card">
+            <div className="flex items-center gap-4 text-red-700">
+              <span className="text-4xl">🚫</span>
+              <div>
+                <h2 className="text-xl font-brush font-bold">账号已封禁</h2>
+                <p className="font-kai text-sm mt-1">
+                  原因：{user.banReason || '违反考试纪律（如多次切屏）'}
+                </p>
+                <p className="font-kai text-xs mt-2 text-red-500">
+                  如有疑问，请联系系统管理员。
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Welcome */}
         <div className="card mb-8 animate-slide-up poem-card">
           <div className="flex items-start gap-4">
@@ -126,15 +149,15 @@ export const DashboardPage: React.FC = () => {
             )}
 
             <Link
-              to={preStatus.disabled ? '#' : '/quiz?phase=PRE_QUALIFIER'}
+              to={preDisabled ? '#' : '/quiz?phase=PRE_QUALIFIER'}
               className={`btn w-full py-3 text-lg font-kai ${
-                preStatus.disabled
+                preDisabled
                   ? 'bg-ink-200 text-ink-400 cursor-not-allowed'
                   : 'btn-primary'
               }`}
-              onClick={(e) => preStatus.disabled && e.preventDefault()}
+              onClick={(e) => preDisabled && e.preventDefault()}
             >
-              {scores.PRE_QUALIFIER?.totalQuestions ? '继续答题' : '开始答题'}
+              {isBanned ? '已封禁' : (scores.PRE_QUALIFIER?.totalQuestions ? '继续答题' : '开始答题')}
             </Link>
           </div>
 
@@ -142,8 +165,8 @@ export const DashboardPage: React.FC = () => {
           <div className="card hover:shadow-ink transition-shadow animate-slide-up poem-card" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-brush text-ink-800">决赛</h3>
-              <span className={`px-3 py-1 rounded-full text-xs text-white font-kai ${finalStatus.color}`}>
-                {finalStatus.label}
+              <span className={`px-3 py-1 rounded-full text-xs text-white font-kai ${isBanned ? 'bg-red-500' : finalStatus.color}`}>
+                {isBanned ? '已封禁' : finalStatus.label}
               </span>
             </div>
             <p className="text-ink-500 mb-4 font-kai text-sm">
@@ -160,15 +183,15 @@ export const DashboardPage: React.FC = () => {
             )}
 
             <Link
-              to={finalStatus.disabled ? '#' : '/quiz?phase=FINALS'}
+              to={finalDisabled ? '#' : '/quiz?phase=FINALS'}
               className={`btn w-full py-3 text-lg font-kai ${
-                finalStatus.disabled
+                finalDisabled
                   ? 'bg-ink-200 text-ink-400 cursor-not-allowed'
                   : 'btn-seal'
               }`}
-              onClick={(e) => finalStatus.disabled && e.preventDefault()}
+              onClick={(e) => finalDisabled && e.preventDefault()}
             >
-              {finalStatus.disabled ? '暂未开始' : '进入决赛'}
+              {isBanned ? '已封禁' : (finalStatus.disabled ? '暂未开始' : '进入决赛')}
             </Link>
           </div>
         </div>

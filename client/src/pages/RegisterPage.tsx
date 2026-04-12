@@ -6,7 +6,6 @@ import { User } from '../types';
 
 export const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: '',
     username: '',
     password: '',
     confirmPassword: '',
@@ -39,7 +38,7 @@ export const RegisterPage: React.FC = () => {
 
     try {
       const response = await authApi.register(
-        formData.email,
+        '', // email is now empty
         formData.username,
         formData.password
       );
@@ -95,23 +94,6 @@ export const RegisterPage: React.FC = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-kai text-ink-600 mb-1.5">
-              邮箱地址
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className="input"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="your@email.com"
-              required
-              autoComplete="email"
-            />
-          </div>
-
           <div>
             <label htmlFor="username" className="block text-sm font-kai text-ink-600 mb-1.5">
               用户名
