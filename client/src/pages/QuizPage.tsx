@@ -26,9 +26,30 @@ export const QuizPage: React.FC = () => {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tabSwitchesRef = useRef(0); // always fresh per question
-  const isMovingRef = useRef(false);
+  const processedQuestionsRef = useRef<Set<string>>(new Set());
 
   const currentQuestion = questions[currentIndex];
+
+  const moveToNext = useCallback(() => {
+    if (!currentQuestion || processedQuestionsRef.current.has(currentQuestion.id)) {
+      return;
+    }
+    
+    processedQuestionsRef.current.add(currentQuestion.id);
+
+    setFeedback(null);
+    setSelectedAnswer('');
+    setError('');
+    setIsSubmitting(false);
+    setTabSwitchCount(0);
+    tabSwitchesRef.current = 0;
+    
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    } else {
+      navigate(`/results?phase=${phase}`);
+    }
+  }, [currentIndex, questions, phase, navigate, currentQuestion]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -40,10 +61,18 @@ export const QuizPage: React.FC = () => {
           return;
         }
         const data = response.data as { questions: Question[] };
-        const unanswered = data.questions.filter((q) => !q.answered);
-        setQuestions(unanswered);
-        if (unanswered.length > 0) {
-          setTimeLeft(unanswered[0].timeLimit);
+        const allQuestions = data.questions;
+        setQuestions(allQuestions);
+        
+        // Find first unanswered question
+        const firstUnansweredIndex = allQuestions.findIndex(q => !q.answered);
+        
+        if (firstUnansweredIndex !== -1) {
+          setCurrentIndex(firstUnansweredIndex);
+          setTimeLeft(allQuestions[firstUnansweredIndex].timeLimit);
+        } else if (allQuestions.length > 0) {
+          // All questions answered, go to results
+          navigate(`/results?phase=${phase}`);
         }
       } catch {
         setError('加载题目失败');
@@ -52,7 +81,7 @@ export const QuizPage: React.FC = () => {
       }
     }
     loadQuestions();
-  }, [phase]);
+  }, [phase, navigate]);
 
   // Anti-cheat: detect tab/window switches
   useEffect(() => {
@@ -86,33 +115,11 @@ export const QuizPage: React.FC = () => {
     };
   }, [currentQuestion?.id, feedback, isSubmitting, navigate]);
 
-  const moveToNext = useCallback(() => {
-    if (isMovingRef.current) return;
-    isMovingRef.current = true;
-
-    setFeedback(null);
-    setSelectedAnswer('');
-    setError('');
-    setIsSubmitting(false);
-    setTabSwitchCount(0);
-    tabSwitchesRef.current = 0;
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      // Reset the guard for the next question after a short delay to ensure state update
-      setTimeout(() => {
-        isMovingRef.current = false;
-      }, 100);
-    } else {
-      navigate(`/results?phase=${phase}`);
-    }
-  }, [currentIndex, questions.length, phase, navigate]);
-
   useEffect(() => {
     if (!currentQuestion || feedback || isSubmitting) return;
 
     setTimeLeft(currentQuestion.timeLimit);
     setStartTime(Date.now());
-    isMovingRef.current = false; // Reset guard when a new question starts
 
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -130,12 +137,13 @@ export const QuizPage: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentIndex, currentQuestion?.id, feedback, isSubmitting, handleTimeout]);
+  }, [currentIndex, currentQuestion?.id, feedback, isSubmitting]);
 
   const handleTimeout = useCallback(async () => {
-    if (!currentQuestion || isSubmitting || feedback || isMovingRef.current) return;
+    if (!currentQuestion || isSubmitting || feedback || processedQuestionsRef.current.has(currentQuestion.id)) return;
+    
     setIsSubmitting(true);
-    const timeTaken = currentQuestion.timeLimit * 1000; // Use full time limit
+    const timeTaken = currentQuestion.timeLimit * 1000;
     try {
       await quizApi.submitAnswer(currentQuestion.id, '__TIMEOUT__', timeTaken);
     } catch (err) {
@@ -172,20 +180,6 @@ export const QuizPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
-  const moveToNext = useCallback(() => {
-    setFeedback(null);
-    setSelectedAnswer('');
-    setError('');
-    setIsSubmitting(false);
-    setTabSwitchCount(0);
-    tabSwitchesRef.current = 0;
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      navigate(`/results?phase=${phase}`);
-    }
-  }, [currentIndex, questions.length, phase, navigate]);
 
   if (isLoading) {
     return (
