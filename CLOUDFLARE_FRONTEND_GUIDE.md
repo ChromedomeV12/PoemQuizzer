@@ -50,7 +50,7 @@ Click **"Save and Deploy"**.
 ---
 
 ## 🏗️ Step 5: Update the Backend (Render)
-1.  Once Cloudflare finishes (green checkmark), copy your new link (e.g., `https://poemquizzer.pages.dev`).
+1.  Once Cloudflare finishes (green checkmark), copy your new link (e.g., `https://poem-guizzer.pages.dev`).
 2.  Go to your **Render.com** dashboard -> **Poem API** -> **Environment**.
 3.  Update **`CLIENT_URL`** to your new Cloudflare link.
 4.  **Save Changes.**
