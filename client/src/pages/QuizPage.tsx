@@ -26,6 +26,7 @@ export const QuizPage: React.FC = () => {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tabSwitchesRef = useRef(0); // always fresh per question
+  const isMovingRef = useRef(false);
 
   const currentQuestion = questions[currentIndex];
 
@@ -85,11 +86,33 @@ export const QuizPage: React.FC = () => {
     };
   }, [currentQuestion?.id, feedback, isSubmitting, navigate]);
 
+  const moveToNext = useCallback(() => {
+    if (isMovingRef.current) return;
+    isMovingRef.current = true;
+
+    setFeedback(null);
+    setSelectedAnswer('');
+    setError('');
+    setIsSubmitting(false);
+    setTabSwitchCount(0);
+    tabSwitchesRef.current = 0;
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      // Reset the guard for the next question after a short delay to ensure state update
+      setTimeout(() => {
+        isMovingRef.current = false;
+      }, 100);
+    } else {
+      navigate(`/results?phase=${phase}`);
+    }
+  }, [currentIndex, questions.length, phase, navigate]);
+
   useEffect(() => {
     if (!currentQuestion || feedback || isSubmitting) return;
 
     setTimeLeft(currentQuestion.timeLimit);
     setStartTime(Date.now());
+    isMovingRef.current = false; // Reset guard when a new question starts
 
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -110,7 +133,7 @@ export const QuizPage: React.FC = () => {
   }, [currentIndex, currentQuestion?.id, feedback, isSubmitting, handleTimeout]);
 
   const handleTimeout = useCallback(async () => {
-    if (!currentQuestion || isSubmitting || feedback) return;
+    if (!currentQuestion || isSubmitting || feedback || isMovingRef.current) return;
     setIsSubmitting(true);
     const timeTaken = currentQuestion.timeLimit * 1000; // Use full time limit
     try {
