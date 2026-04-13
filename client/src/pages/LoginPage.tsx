@@ -26,17 +26,32 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      const { token, user } = response.data as { token: string; user: User };
-      login(token, user);
+      // Extract data - check both top level and nested in 'data'
+      const rawData = response.data as any;
+      let token = rawData?.token;
+      let user = rawData?.user;
 
-      if (!user.profileComplete) {
+      // If missing at top level, check if it's nested
+      if (!token && rawData?.data?.token) token = rawData.data.token;
+      if (!user && rawData?.data?.user) user = rawData.data.user;
+
+      if (!token || !user) {
+        console.error('Incomplete login data structure:', rawData);
+        setError('登录接口返回数据不完整，请稍后重试');
+        return;
+      }
+
+      login(token, user as User);
+
+      if (!(user as User).profileComplete) {
         navigate('/profile-setup');
-      } else if (user.role === 'ADMIN') {
+      } else if ((user as User).role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
-    } catch {
+    } catch (err) {
+      console.error('Login catch error:', err);
       setError('网络错误，请重试');
     } finally {
       setIsLoading(false);

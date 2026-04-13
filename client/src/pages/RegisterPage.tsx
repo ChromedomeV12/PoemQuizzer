@@ -43,21 +43,30 @@ export const RegisterPage: React.FC = () => {
         formData.password
       );
 
-      console.log('Registration response:', response);
+      console.log('Registration full response:', response);
 
       if (response.error) {
         setError(response.error);
         return;
       }
 
-      if (!response.data || !('token' in (response.data as any)) || !('user' in (response.data as any))) {
-        console.error('Incomplete registration data:', response.data);
+      // Extract data - check both top level and nested in 'data'
+      const rawData = response.data as any;
+      let token = rawData?.token;
+      let user = rawData?.user;
+
+      // If missing at top level, check if it's nested (shouldn't be, but just in case)
+      if (!token && rawData?.data?.token) token = rawData.data.token;
+      if (!user && rawData?.data?.user) user = rawData.data.user;
+
+      if (!token || !user) {
+        console.error('Incomplete registration data structure:', rawData);
+        console.log('Data keys:', rawData ? Object.keys(rawData) : 'null/undefined');
         setError('注册接口返回数据不完整，请稍后重试');
         return;
       }
 
-      const { token, user } = response.data as { token: string; user: User };
-      login(token, user);
+      login(token, user as User);
       navigate('/profile-setup');
     } catch (err) {
       console.error('Registration catch error:', err);

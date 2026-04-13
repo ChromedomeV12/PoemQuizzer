@@ -43,10 +43,23 @@ export const ProfileSetupPage: React.FC = () => {
         return;
       }
 
-      const { user } = response.data as { user: User };
-      updateUser(user);
+      // Extract data - check both top level and nested in 'data'
+      const rawData = response.data as any;
+      let user = rawData?.user;
+
+      // If missing at top level, check if it's nested
+      if (!user && rawData?.data?.user) user = rawData.data.user;
+
+      if (!user) {
+        console.error('Incomplete profile setup data structure:', rawData);
+        setError('接口返回数据不完整，请稍后重试');
+        return;
+      }
+
+      updateUser(user as User);
       navigate('/dashboard');
-    } catch {
+    } catch (err) {
+      console.error('Profile setup catch error:', err);
       setError('网络错误，请重试');
     } finally {
       setIsLoading(false);
