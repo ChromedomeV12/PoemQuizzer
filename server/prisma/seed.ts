@@ -318,7 +318,7 @@ async function main() {
         keywords: q.keywords,
         explanation: q.explanation,
         points: q.points,
-        timeLimit: 15,
+        timeLimit: 20,
         order: q.order,
       },
     });
@@ -385,7 +385,7 @@ async function main() {
         keywords: q.keywords,
         explanation: q.explanation,
         points: q.points,
-        timeLimit: 20,
+        timeLimit: 25,
         order: q.order,
       },
     });
@@ -444,7 +444,7 @@ async function main() {
         keywords: q.keywords,
         explanation: q.explanation,
         points: q.points,
-        timeLimit: 20,
+        timeLimit: 25,
         order: q.order,
       },
     });
@@ -454,9 +454,9 @@ async function main() {
   console.log('\n🎉 诗词大会预选赛题目导入完成！');
   console.log('📊 统计：');
   console.log('   选择题：15题（每题12秒，2分）');
-  console.log('   简答题：10题（每题15秒，3分）');
-  console.log('   描述线索题：5题（每题20秒，4分）');
-  console.log('   描述线索题进阶：4题（每题20秒，5分）');
+  console.log('   简答题：10题（每题20秒，3分）');
+  console.log('   描述线索题：5题（每题25秒，4分）');
+  console.log('   描述线索题进阶：4题（每题25秒，5分）');
   console.log(`   总计：${mcQuestions.length + saQuestions.length + clueQuestions.length + advancedClueQuestions.length}题，满分 ${mcQuestions.length * 2 + saQuestions.length * 3 + clueQuestions.length * 4 + advancedClueQuestions.length * 5}分`);
 }
 
