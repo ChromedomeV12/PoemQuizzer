@@ -96,6 +96,7 @@ export const QuizPage: React.FC = () => {
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
           handleTimeout();
           return 0;
         }
@@ -106,19 +107,20 @@ export const QuizPage: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentIndex, currentQuestion?.id]);
+  }, [currentIndex, currentQuestion?.id, feedback, isSubmitting, handleTimeout]);
 
   const handleTimeout = useCallback(async () => {
     if (!currentQuestion || isSubmitting || feedback) return;
     setIsSubmitting(true);
-    const timeTaken = Date.now() - startTime;
+    const timeTaken = currentQuestion.timeLimit * 1000; // Use full time limit
     try {
       await quizApi.submitAnswer(currentQuestion.id, '__TIMEOUT__', timeTaken);
     } catch (err) {
       console.error('Timeout submission error:', err);
+    } finally {
+      moveToNext();
     }
-    moveToNext();
-  }, [currentQuestion, isSubmitting, feedback, startTime]);
+  }, [currentQuestion, isSubmitting, feedback, moveToNext]);
 
   const handleSubmit = async () => {
     if (!currentQuestion || !selectedAnswer.trim() || isSubmitting || feedback) return;

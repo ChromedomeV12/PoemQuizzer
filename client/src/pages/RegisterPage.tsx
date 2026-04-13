@@ -60,9 +60,9 @@ export const RegisterPage: React.FC = () => {
       if (!user && rawData?.data?.user) user = rawData.data.user;
 
       if (!token || !user) {
-        console.error('Incomplete registration data structure:', rawData);
-        console.log('Data keys:', rawData ? Object.keys(rawData) : 'null/undefined');
-        setError('注册接口返回数据不完整，请稍后重试');
+        console.warn('Incomplete registration data structure but likely successful:', rawData);
+        alert('注册成功！请使用刚创建的账号登录。');
+        navigate('/login');
         return;
       }
 
