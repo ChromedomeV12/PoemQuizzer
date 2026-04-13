@@ -38,25 +38,61 @@ const adapter = new PrismaNeon({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🌱 Seeding database with Chinese poem questions...');
+  console.log('🧹 Cleaning database (wiping all previous data)...');
+  
+  // Delete in order to respect foreign key constraints
+  await prisma.submission.deleteMany();
+  await prisma.score.deleteMany();
+  await prisma.adminLog.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.question.deleteMany();
 
-  // ── Create Admin User ──
-  const adminPassword = await bcrypt.hash('admin123', 12);
-  await prisma.user.upsert({
-    where: { email: 'admin@poemquizzer.com' },
-    update: {},
-    create: {
-      email: 'admin@poemquizzer.com',
-      username: 'admin',
-      password: adminPassword,
+  console.log('🌱 Seeding database with fresh data...');
+
+  // ── Create 3 Specific Accounts ──
+  const hashedAdminPassword = await bcrypt.hash('admin123', 12);
+  const hashedUserPassword = await bcrypt.hash('password123', 12);
+
+  // Admin 1
+  await prisma.user.create({
+    data: {
+      username: 'admin1',
+      password: hashedAdminPassword,
       role: Role.ADMIN,
-      fullName: '系统管理员',
+      fullName: '管理员一号',
       grade: '教师',
       studentId: 'ADMIN-001',
       profileComplete: true,
     },
   });
-  console.log('✅ Admin user created');
+
+  // Admin 2
+  await prisma.user.create({
+    data: {
+      username: 'admin2',
+      password: hashedAdminPassword,
+      role: Role.ADMIN,
+      fullName: '管理员二号',
+      grade: '教师',
+      studentId: 'ADMIN-002',
+      profileComplete: true,
+    },
+  });
+
+  // Test User
+  await prisma.user.create({
+    data: {
+      username: 'testuser',
+      password: hashedUserPassword,
+      role: Role.USER,
+      fullName: '测试学生',
+      grade: '高一',
+      studentId: 'TEST-2026',
+      profileComplete: true,
+    },
+  });
+
+  console.log('✅ 3 accounts created (admin1, admin2, testuser)');
 
   // ══════════════════════════════════════════════
   // 一、选择题 (Multiple Choice) — 12s, 2pts each
