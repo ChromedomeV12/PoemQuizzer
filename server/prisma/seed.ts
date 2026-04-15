@@ -5,37 +5,14 @@
  */
 
 import { PrismaClient, Prisma, QuestionType, EventPhase, Role } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
-import { neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
-// Diagnostic: Check if environment variables are visible
-console.log('🔍 Checking environment...');
-console.log('   DATABASE_URL present:', !!process.env.DATABASE_URL);
-if (process.env.DATABASE_URL) {
-  console.log('   DATABASE_URL length:', process.env.DATABASE_URL.length);
-  console.log('   DATABASE_URL starts with:', process.env.DATABASE_URL.substring(0, 15));
-}
-
-// Configure Neon for WebSocket support
-neonConfig.webSocketConstructor = ws;
-
-// Prioritize system environment (Render) over .env file
-const connectionString = process.env.DATABASE_URL || '';
-
-if (!connectionString) {
-  console.error('❌ Error: DATABASE_URL environment variable is not set or empty.');
-  console.log('   Available keys:', Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('PASSWORD')));
-  process.exit(1);
-}
-
-const adapter = new PrismaNeon({ connectionString });
-const prisma = new PrismaClient({ adapter });
+// Initialize Prisma
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('🧹 Cleaning database (wiping all previous data)...');

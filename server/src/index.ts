@@ -3,18 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
-import { neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
 import rateLimit from 'express-rate-limit';
 
-// Required for Neon Serverless WebSockets
-neonConfig.webSocketConstructor = ws;
+// Load environment variables
+dotenv.config();
 
-// Initialize Prisma with Neon Serverless Adapter
-const connectionString = process.env.DATABASE_URL || '';
-const adapter = new PrismaNeon({ connectionString });
-export const prisma = new PrismaClient({ adapter });
+// Initialize Prisma
+export const prisma = new PrismaClient();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,8 +48,6 @@ app.options('*', cors({
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-
-const PORT = process.env.PORT || 5000;
 
 // Rate limiting
 const limiter = rateLimit({
