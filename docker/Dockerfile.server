@@ -1,46 +1,25 @@
-# ── Server Dockerfile ──
-# Context: project root (../ from docker/)
-# Multi-stage: install all deps, build, then run with production deps
-
-FROM node:20-alpine AS base
-RUN apk add --no-cache openssl
+# Build context: repository root. Keep this file in sync with the root Dockerfile.
+FROM node:22.23.4-alpine AS build
+RUN apk add --no-cache --upgrade ca-certificates openssl && update-ca-certificates
 WORKDIR /app
-
-# ── Stage 1: Install ALL dependencies (including devDeps for build)
-FROM base AS deps
+COPY package.json package-lock.json ./
+COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
-COPY package.json ./
-RUN npm install
-WORKDIR /app/server
-RUN npm install
+RUN npm ci
+COPY tsconfig.base.json ./
+COPY server ./server
+RUN npm run build:server && npm prune --omit=dev
 
-# ── Stage 2: Build
-FROM base AS builder
-COPY --from=deps /app ./
-COPY server/tsconfig.json ./server/tsconfig.json
-COPY server/src ./server/src
-COPY server/prisma ./server/prisma
-COPY tsconfig.base.json ./tsconfig.base.json
-
-WORKDIR /app/server
-RUN npx prisma generate
-RUN npm run build
-
-# ── Stage 3: Production runtime
-FROM node:20-alpine AS runner
-RUN apk add --no-cache openssl
+FROM node:22.23.4-alpine AS runtime
+RUN apk add --no-cache --upgrade ca-certificates openssl && update-ca-certificates
+ENV NODE_ENV=production
 WORKDIR /app
-
-# Copy production package.json and install ONLY production deps
-COPY server/package.json ./package.json
-RUN npm install --omit=dev
-
-# Copy built output + prisma schema + generated client
-COPY --from=builder /app/server/dist ./dist
-COPY --from=builder /app/server/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/server/node_modules/@prisma ./node_modules/@prisma
-
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/server/package.json ./server/package.json
+COPY --from=build /app/server/dist ./server/dist
+COPY --from=build /app/server/prisma ./server/prisma
+COPY --from=build /app/server/prisma.config.ts ./server/prisma.config.ts
+WORKDIR /app/server
 EXPOSE 5000
-
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]
+# Schema changes are an explicit operator step, never an accept-data-loss startup.
+CMD ["node", "dist/index.js"]

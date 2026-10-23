@@ -1,3 +1,5 @@
+> Current build/deployment instructions: [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md). The current provider is MySQL; legacy PostgreSQL/Neon instructions below require a separate provider migration.
+
 # 🌐 Cloudflare Pages: Step-by-Step Guide for China-Friendly Hosting
 
 Vercel is often blocked in mainland China. This guide explains how to move your website to **Cloudflare Pages**, which is much more stable for Chinese students.
@@ -42,7 +44,7 @@ You must add **two** variables here, or the site will be blank or crash.
     *   **Value:** `https://poem-guizzer.onrender.com/api`
 3.  **Variable 2 (The Node Fix):**
     *   **Name:** `NODE_VERSION`
-    *   **Value:** `20` 
+    *   **Value:** `22.23.4` 
     *   *(This ensures Cloudflare uses modern tools required for React 19).*
 
 Click **"Save and Deploy"**.
@@ -68,7 +70,7 @@ If you see an error saying `package.json and package-lock.json are out of sync`:
 *   This tells Cloudflare to ignore the sync issue and just install the latest versions.
 
 ### 2. The Node.js Version Error
-If the build fails immediately, ensure you have set `NODE_VERSION` to `20` in the environment variables.
+If the build fails immediately, ensure you have set `NODE_VERSION` to `22.23.4` in the environment variables.
 
 ### 3. "Failed to Fetch"
 This means the **VITE_API_URL** is wrong. Ensure it starts with `https://` and ends with `/api`.

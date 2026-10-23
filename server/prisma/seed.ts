@@ -4,7 +4,8 @@
  * Run with: npm run db:seed
  */
 
-import { PrismaClient, Prisma, QuestionType, EventPhase, Role } from '@prisma/client';
+import { Prisma, Prisma, QuestionType, EventPhase, Role } from '@prisma/client';
+import { createPrismaClient } from '../src/database';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 
@@ -12,7 +13,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Initialize Prisma
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main() {
   console.log('🧹 Cleaning database (wiping all previous data)...');

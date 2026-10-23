@@ -2,14 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './database';
 import rateLimit from 'express-rate-limit';
 
 // Load environment variables
 dotenv.config();
 
 // Initialize Prisma
-export const prisma = new PrismaClient();
+export const prisma = createPrismaClient();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

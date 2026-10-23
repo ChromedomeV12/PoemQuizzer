@@ -166,7 +166,7 @@ router.post(
       }
 
       // Generate JWT
-      const token = generateToken(user.id, user.email, user.role);
+      const token = generateToken(user.id, user.email || 'no-email', user.role);
 
       res.json({
         message: 'Login successful',

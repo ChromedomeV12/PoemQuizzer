@@ -1,0 +1,73 @@
+name: Runtime and deployment validation
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: fixture-root
+          MYSQL_DATABASE: poemquizzer
+          MYSQL_USER: poemfixture
+          MYSQL_PASSWORD: fixture@password
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pfixture-root"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DATABASE_URL: mysql://poemfixture:fixture%40password@127.0.0.1:3306/poemquizzer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22.23.4'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test --workspace server
+      - run: npm run db:push --workspace server
+      - run: node server/test/database-smoke.cjs
+      - run: node server/test/api-smoke.cjs
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22.23.4'
+          cache: npm
+      - run: npm ci --workspace client --ignore-scripts
+      - run: npm run build
+        working-directory: client
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [Dockerfile, docker/Dockerfile.client, docker/Dockerfile.server]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - run: docker build --pull --no-cache -t poemquizzer:security -f "${{ matrix.dockerfile }}" .
+      - name: Verify the built production artifact
+        shell: bash
+        run: |
+          if [ "${{ matrix.dockerfile }}" = "docker/Dockerfile.client" ]; then
+            docker run --rm poemquizzer:security test -s /usr/share/nginx/html/index.html
+          else
+            docker run --rm poemquizzer:security node -e 'const c = require("./dist/database.js").createPrismaClient("mysql://build:build@localhost/build"); c.$disconnect();'
+          fi
