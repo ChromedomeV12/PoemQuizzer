@@ -1,3 +1,5 @@
+> Current build/deployment instructions: [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md). The current provider is MySQL; legacy PostgreSQL/Neon instructions below require a separate provider migration.
+
 # 🐘 Neon Database: Step-by-Step "DIY" Guide for Non-Techies
 
 This guide is for setting up the **"Digital Filing Cabinet"** (the Database) where all the student names, poetry questions, and scores will be safely stored. Follow these steps exactly.

@@ -1,3 +1,5 @@
+> Current build/deployment instructions: [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md). The current provider is MySQL; legacy PostgreSQL/Neon instructions below require a separate provider migration.
+
 # 🌐 Cloudflare Pages: Step-by-Step Guide for China-Friendly Hosting
 
 Vercel is often blocked in mainland China. This guide explains how to move your website to **Cloudflare Pages**, which is much more stable for Chinese students.

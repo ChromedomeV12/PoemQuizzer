@@ -1,3 +1,5 @@
+> Current build/deployment instructions: [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md). The current provider is MySQL; legacy PostgreSQL/Neon instructions below require a separate provider migration.
+
 # PoemQuizzer - Online Quiz Competition Platform
 
 A responsive, high-performance Online Quiz Competition Web App built for school events.

@@ -348,7 +348,7 @@ export const AdminPage: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{String(p.fullName)}</p>
-                          {p.isBanned && (
+                          {p.isBanned === true && (
                             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-600 text-white font-bold">
                               已封禁
                             </span>

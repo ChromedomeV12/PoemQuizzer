@@ -1,3 +1,5 @@
+> Current build/deployment instructions: [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md). The current provider is MySQL; legacy PostgreSQL/Neon instructions below require a separate provider migration.
+
 # 🚀 PoemQuizzer Deployment Guide (2026 Edition)
 
 This guide covers the modern, **fully free** deployment stack using **Prisma 7**, **Neon (PostgreSQL)**, **Render (Backend)**, and **Vercel (Frontend)**.
