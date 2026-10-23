@@ -44,6 +44,7 @@ Render hosts your Express.js API and handles database migrations.
     *   `JWT_SECRET`: A long, random string.
     *   `PORT`: `5000`
     *   `NODE_ENV`: `production`
+    *   `NODE_VERSION`: `22.23.4` (remove any older dashboard override before redeploying).
     *   `CLIENT_URL`: Your Vercel URL (add this *after* setting up Vercel).
 
 ---
@@ -60,6 +61,14 @@ Vercel provides high-performance hosting for the React application.
 5.  **Deploy:** Click Deploy. Once finished, copy the provided URL and add it to your Render `CLIENT_URL` environment variable.
 
 ---
+
+## October 2026 security rebuild
+
+Use Node.js 22.23.4 or a later patched 22.x release for builds and running services. Clear the Render build cache and deploy again so the native system certificate store is refreshed. Verify `node --version` in the deployed backend. Vercel projects rooted at `client` should also use the patched Node 22 runtime; the client version file is included for builds.
+
+For Docker deployments, rebuild with `docker compose -f docker/docker-compose.yml build --pull --no-cache` and recreate the services with `docker compose -f docker/docker-compose.yml up -d`. Verify `node --version` inside the backend container. The Node build and runtime stages refresh their CA packages during the rebuild. Existing running services do not change until redeployed.
+
+See the [eMudhra advisory](https://render.com/docs/advisory-emudhra) for certificate-store details.
 
 ## 🛠️ Prisma 7 & PostgreSQL Best Practices
 
