@@ -6,7 +6,7 @@ const net = require('node:net');
 const { once } = require('node:events');
 const { createPrismaClient } = require('../dist/database.js');
 const prisma = createPrismaClient();
-const username = `ci-${randomUUID().replaceAll('-', '').slice(0, 16)}`;
+const username = `ci_${randomUUID().replaceAll('-', '').slice(0, 16)}`;
 let child;
 (async () => {
   try {
